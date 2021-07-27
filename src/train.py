@@ -4,10 +4,9 @@ import numpy as np
 import json
 import sys
 
-directory = "YOUR_DIRECTORY_NAME_HERE"
-user_data = directory + "/train"
-valid_data = directory + "/val"
-test_data = directory + "/test" # this can be the label book, or any other test set you create
+directory = "../data/raw"
+user_data = directory
+test_data = directory + "/label_book" # this can be the label book, or any other test set you create
 
 ### DO NOT MODIFY BELOW THIS LINE, THIS IS THE FIXED MODEL ###
 batch_size = 8
