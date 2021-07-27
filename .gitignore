@@ -1,0 +1,11 @@
+# misc
+.*
+!/.gitignore
+
+
+# do not upload competition data
+data/*
+
+# tensorflow model files
+src/checkpoint
+src/best_model.*
