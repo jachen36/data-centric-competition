@@ -1,8 +1,8 @@
-import cv2
 import os
-
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
+import cv2
 
 
 def convert_images(input_folder, output_folder):

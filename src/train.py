@@ -1,12 +1,12 @@
-import tensorflow as tf
-from tensorflow import keras
-import numpy as np
-import json
 import sys
+
+import tensorflow as tf
 
 directory = "../data/raw"
 user_data = directory
-test_data = directory + "/label_book" # this can be the label book, or any other test set you create
+test_data = (
+    directory + "/label_book"
+)  # this can be the label book, or any other test set you create
 
 ### DO NOT MODIFY BELOW THIS LINE, THIS IS THE FIXED MODEL ###
 batch_size = 8
@@ -15,7 +15,7 @@ tf.random.set_seed(123)
 
 if __name__ == "__main__":
     train = tf.keras.preprocessing.image_dataset_from_directory(
-        user_data + '/train',
+        user_data + "/train",
         labels="inferred",
         label_mode="categorical",
         class_names=["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"],
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     )
 
     valid = tf.keras.preprocessing.image_dataset_from_directory(
-        user_data + '/val',
+        user_data + "/val",
         labels="inferred",
         label_mode="categorical",
         class_names=["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"],
@@ -53,9 +53,7 @@ if __name__ == "__main__":
     )
 
     base_model = tf.keras.applications.ResNet50(
-        input_shape=(32, 32, 3),
-        include_top=False,
-        weights=None,
+        input_shape=(32, 32, 3), include_top=False, weights=None
     )
     base_model = tf.keras.Model(
         base_model.inputs, outputs=[base_model.get_layer("conv2_block3_out").output]
@@ -86,10 +84,7 @@ if __name__ == "__main__":
     )
 
     history = model.fit(
-        train,
-        validation_data=valid,
-        epochs=100,
-        callbacks=[checkpoint],
+        train, validation_data=valid, epochs=100, callbacks=[checkpoint]
     )
 
     model.load_weights("best_model")
@@ -99,5 +94,3 @@ if __name__ == "__main__":
 
     test_loss, test_acc = model.evaluate(test)
     print(f"test loss {test_loss}, test acc {test_acc}")
-
-   
