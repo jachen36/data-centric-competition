@@ -181,10 +181,22 @@ def copy_group_to_dir(
     source_dir: Union[str, Path],
     dest_dir: Union[str, Path],
     group: Union[str, List[str]],
+    prefix_image: str = None,
 ) -> List[Dict[str, str]]:
     """Group images together by copying image into separate directory based on one
         attribute and its value
 
+    args:
+        df : pd.DataFrame
+            each image as a row with features as column
+        source_dir : str, Path
+            where all the images are located in a flatten format
+        dest_dir : str, Path
+            where to copy the images to
+        group : str, List[str]
+            what feature's value to break the groups into based. create nested directory
+        prefix_image : str
+            column to to prefix image filename
 
     returns
         list of images that doesn't exist in either the dataframe or source_dir
@@ -193,31 +205,30 @@ def copy_group_to_dir(
     nan values are dropped so if you want them, fillnan with a value like "none"
     This makes it easier to find odd ones when group of images are placed together and
     viewed in a grid.
-
     """
-
     source_dir = Path(source_dir)  # has to be the flatten
     source_images = {i.name: i for i in list(source_dir.glob("*.png"))}
     assert len(source_images) > 0, f"No images found. Could be wrong path: {source_dir}"
-
     dest_dir = Path(dest_dir)
-    dest_dir.mkdir(exist_ok=True)
 
-    group = [group] if isinstance(group, str) else group
-    group += ["image"]
-
-    # collect images that exist in one source, but not the other
     unknown_images = list(set(df.image) - set(source_images.keys())) + list(
         set(source_images.keys()) - set(df.image)
     )
 
     df = df.dropna(subset=group).copy()
-    df["dest_path"] = df[group].agg(lambda x: dest_dir.joinpath(*x), axis=1)
+    for name, group in df.groupby(group):
 
-    for row in df.itertuples():
+        dest = dest_dir.joinpath(*name)
+        dest.mkdir(parents=True, exist_ok=True)
 
-        image_path = source_images.get(row.image, None)
-        if image_path:
-            shutil.copy(image_path, row.dest_path)
+        for row in group.itertuples():
+            org_image_path = source_images.get(row.image, None)
+
+            if org_image_path:
+                if prefix_image:
+                    copy_image_name = "_".join([getattr(row, prefix_image), row.image])
+                else:
+                    copy_image_name = row.image
+                shutil.copy(org_image_path, dest / copy_image_name)
 
     return unknown_images
