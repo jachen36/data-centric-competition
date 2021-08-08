@@ -1,21 +1,40 @@
+# standard library
 import sys
+from pathlib import Path
+from typing import Tuple, Union
 
+# third party
 import tensorflow as tf
 
-directory = "../data/raw"
-user_data = directory
-test_data = (
-    directory + "/label_book"
-)  # this can be the label book, or any other test set you create
 
-### DO NOT MODIFY BELOW THIS LINE, THIS IS THE FIXED MODEL ###
-batch_size = 8
-tf.random.set_seed(123)
+def train_model(
+    user_data: Union[str, Path], test_data: Union[str, Path], short_run: bool = False
+) -> Tuple[float, float]:
+    """ "Run competition model on your dataset
 
+    args:
+        user_data : str, Path
+            Path where your train and val folder is located where each symbol are in their individual folder
+        test_data : str, Path
+            where label_book is located
+        short_run : bool
+            wheather to run a few epochs or the full 100 epochs set by competition
 
-if __name__ == "__main__":
+    return:
+        loss, acc from validation
+    """
+
+    user_data = Path(user_data)
+    # this can be the label book, or any other test set you create
+    test_data = Path(test_data)
+
+    ### DO NOT MODIFY BELOW THIS LINE, THIS IS THE FIXED MODEL ###
+    batch_size = 8
+    tf.random.set_seed(123)
+    epochs = 5 if short_run else 100
+
     train = tf.keras.preprocessing.image_dataset_from_directory(
-        user_data + "/train",
+        user_data / "train",
         labels="inferred",
         label_mode="categorical",
         class_names=["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"],
@@ -26,7 +45,7 @@ if __name__ == "__main__":
     )
 
     valid = tf.keras.preprocessing.image_dataset_from_directory(
-        user_data + "/val",
+        user_data / "val",
         labels="inferred",
         label_mode="categorical",
         class_names=["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"],
@@ -83,14 +102,13 @@ if __name__ == "__main__":
         save_weights_only=True,
     )
 
-    history = model.fit(
-        train, validation_data=valid, epochs=100, callbacks=[checkpoint]
-    )
+    _ = model.fit(train, validation_data=valid, epochs=epochs, callbacks=[checkpoint])
 
     model.load_weights("best_model")
 
     loss, acc = model.evaluate(valid)
-    print(f"final loss {loss}, final acc {acc}")
-
     test_loss, test_acc = model.evaluate(test)
+
+    print(f"final loss {loss}, final acc {acc}")
     print(f"test loss {test_loss}, test acc {test_acc}")
+    return loss, acc
