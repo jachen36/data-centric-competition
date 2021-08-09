@@ -1,8 +1,14 @@
+# standard library
 import shutil
 from pathlib import Path
 from typing import Dict, List, Union
 
+# third party
+import cv2
 import pandas as pd
+
+# internal
+from local_lib import convert
 
 
 def validation(annot_dict) -> bool:
@@ -232,3 +238,47 @@ def copy_group_to_dir(
                 shutil.copy(org_image_path, dest / copy_image_name)
 
     return unknown_images
+
+
+def apply_aug(
+    df: pd.DataFrame,
+    source_dir: Union[str, Path],
+    dest_dir: Union[str, Path],
+    aug_seq,
+    group: Union[str, List[str]],
+) -> None:
+    """Apply a sequential image augmentation to a list of images
+
+    args:
+        df: pd.DataFrame
+            Contains filename, metadata, and how many times it should be augmented
+        source_dir: str, Path
+            where are the original images located
+        dest_dir: str, Path
+            where to save the image
+        aug_seq:
+            imgaug augmentation sequence
+        group: str, list(str)
+            hierarchical folder structure to groupby
+    """
+    source_dir = Path(source_dir)
+    dest_dir = Path(dest_dir)
+
+    df = df.dropna(subset=group).copy()
+
+    for name, group in df.groupby(group):
+
+        dest = dest_dir.joinpath(*name)
+        dest.mkdir(parents=True, exist_ok=True)
+
+        for row in group.itertuples():
+            if row.aug_amount <= 0:
+                continue
+
+            image = cv2.imread(str(source_dir / row.image), cv2.IMREAD_GRAYSCALE)
+            image_augs = aug_seq(images=[image] * row.aug_amount)
+
+            for idx, image_aug in enumerate(image_augs):
+                image_aug = convert.quantize(image_aug)
+                output_path = str(dest / f"{Path(row.image).stem}_aug_{idx}.png")
+                cv2.imwrite(output_path, image_aug)

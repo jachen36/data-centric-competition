@@ -1,8 +1,25 @@
+# standard library
 import os
 from glob import glob
 from pathlib import Path
 
+# third party
 import cv2
+import numpy as np
+
+
+def quantize(image: np.ndarray) -> np.ndarray:
+    """Standardize image by quantize
+
+    args:
+        image : np.ndarray
+
+    return:
+        np.ndarry
+    """
+    image = (image // 43) * 43
+    image[image > 43] = 255
+    return image
 
 
 def convert_images(input_folder, output_folder):
@@ -10,9 +27,7 @@ def convert_images(input_folder, output_folder):
     input_files = glob(os.path.join(input_folder, "*.png"))
     for f in input_files:
         image = cv2.imread(f, cv2.IMREAD_GRAYSCALE)
-        # quantize
-        image = (image // 43) * 43
-        image[image > 43] = 255
+        image = quantize(image)
         cv2.imwrite(os.path.join(output_folder, os.path.basename(f)), image)
 
 
