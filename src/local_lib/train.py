@@ -8,7 +8,10 @@ import tensorflow as tf
 
 
 def train_model(
-    user_data: Union[str, Path], test_data: Union[str, Path], short_run: bool = False
+    user_data: Union[str, Path],
+    test_data: Union[str, Path],
+    epochs: int = 100,
+    verbose: int = 1,
 ) -> Tuple[float, float]:
     """ "Run competition model on your dataset
 
@@ -17,8 +20,8 @@ def train_model(
             Path where your train and val folder is located where each symbol are in their individual folder
         test_data : str, Path
             where label_book is located
-        short_run : bool
-            wheather to run a few epochs or the full 100 epochs set by competition
+        epoch : int
+            number of epochs to run
 
     return:
         loss, acc from validation
@@ -31,7 +34,6 @@ def train_model(
     ### DO NOT MODIFY BELOW THIS LINE, THIS IS THE FIXED MODEL ###
     batch_size = 8
     tf.random.set_seed(123)
-    epochs = 5 if short_run else 100
 
     train = tf.keras.preprocessing.image_dataset_from_directory(
         user_data / "train",
@@ -102,7 +104,13 @@ def train_model(
         save_weights_only=True,
     )
 
-    _ = model.fit(train, validation_data=valid, epochs=epochs, callbacks=[checkpoint])
+    _ = model.fit(
+        train,
+        validation_data=valid,
+        epochs=epochs,
+        callbacks=[checkpoint],
+        verbose=verbose,
+    )
 
     model.load_weights("best_model")
 

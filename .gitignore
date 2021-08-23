@@ -8,8 +8,8 @@
 data/*
 
 # tensorflow model files
-src/checkpoint
-src/best_model.*
+checkpoint*
+best_model.*
 
 # package
 *.pyc
