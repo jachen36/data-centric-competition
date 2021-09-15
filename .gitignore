@@ -2,8 +2,6 @@
 .*
 !/.gitignore
 
-
-
 # do not upload competition data
 data/*
 

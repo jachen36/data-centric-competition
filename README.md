@@ -6,7 +6,7 @@ First ever type of data science competition where the only focus is on the data 
 
 # Summary of My Approach
 
-Due to the limited amount of time I had, I wasn't able to try much before it ended.
+Due to the limited amount of time I had, I wasn't able to try much before it ended. Also because the leaderboard takes a long time to update after submission, the last few tried failed to make it to the leaderboard; therefore, I cannot tell if the augmentation experiment was fruitfull.
 
 1. Consistent labeling by documenting a guide on how to label.
 1. Augmentations to add variety to the training dataset and make model generalize better.
